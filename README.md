@@ -1,203 +1,209 @@
-<div align="center">
+# SpotiFLAC Mobile — iOS-only Edition
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/readme/banner-readme-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="assets/readme/banner-readme-light.png">
-  <img alt="SpotiFLAC Mobile" src="assets/readme/banner-readme-light.png" width="650" height="auto">
-</picture>
+A high-quality FLAC player for iOS with native 10-band equalizer support.
 
-<p align="center">
-  <a href="https://trendshift.io/repositories/25971" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/25971" alt="spotiflacapp%2FSpotiFLAC-Mobile | Trendshift" width="250" height="55">
-  </a>
-</p>
+## Features
 
-</div>
+### Core Playback
+- **FLAC & Audio Format Support**: Play FLAC, MP3, WAV, and other common audio formats on iOS
+- **High-Quality Audio**: Optimized for local file playback with full bitrate support
+- **History & Library**: Organize and track your listening history
 
-<div align="center">
+### Advanced Equalizer (iOS)
+- **10-Band Parametric EQ**: Fine-tune audio with individual control over 10 frequency bands (31 Hz – 16 kHz)
+- **Built-in Presets**:
+  - Flat (neutral)
+  - Rock (bass & treble boost)
+  - Pop (midrange emphasis)
+  - Jazz (smooth, balanced)
+  - Classical (wide frequency response)
+  - Bass Boost (low-end enhancement)
+  - Vocal (vocal clarity)
+  - Custom (user-defined)
+- **Preamp Control**: Global gain adjustment (±6 dB)
+- **Persistent Settings**: EQ preferences are automatically saved and restored
 
-[![GitHub Release](https://img.shields.io/github/v/release/spotiflacapp/SpotiFLAC-Mobile?style=for-the-badge&logo=github)](https://github.com/spotiflacapp/SpotiFLAC-Mobile/releases)
-[![Crowdin](https://img.shields.io/badge/HELP%20TRANSLATE%20ON-CROWDIN-%2321252b?style=for-the-badge&logo=crowdin)](https://crowdin.com/project/spotiflac-mobile)
+### Optional Internal Player
+- **AVAudioEngine-based Player**: Native iOS audio engine with hardware-accelerated processing
+- **Opt-in Design**: Disabled by default; enable in Settings → Use Internal Player
+- **Full EQ Support**: The internal player routes audio through the 10-band EQ
 
-[![Telegram Channel](https://img.shields.io/badge/CHANNEL-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/spotiflac)
-[![Telegram Community](https://img.shields.io/badge/COMMUNITY-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/spotiflac_chat)
+## Platform Support
 
-</div>
+**iOS Only** (v14.0+)
 
-## Screenshots
+- No Android version currently maintained
+- Requires physical iOS device for full audio playback testing (EQ audio behavior may be limited on simulator)
 
-<p align="center">
-  <img src="assets/readme/1.jpg?v=2" width="200" />
-  <img src="assets/readme/2.jpg?v=2" width="200" />
-  <img src="assets/readme/3.jpg?v=2" width="200" />
-  <img src="assets/readme/4.jpg?v=2" width="200" />
-</p>
+## Getting Started
 
----
+### Prerequisites
+- **macOS** with Xcode 15+
+- **Xcode Command Line Tools**
+- **Flutter** (stable channel, pinned in `.fvmrc`)
+- **CocoaPods** (for iOS dependency management)
+- **Go** (for backend build; check `go_backend/go.mod`)
 
-## Extensions
+### Installation
 
-Extensions let the community add new music sources and features without waiting for app updates. When a streaming service API changes or a new source becomes available, extensions can be updated independently.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ShanTo-Msr/SpotiFLAC-Mobile.git
+   cd SpotiFLAC-Mobile
+   ```
 
-### Installing Extensions
+2. **Setup Flutter environment**
+   ```bash
+   flutter pub get
+   flutter clean
+   ```
 
-1. Open the **Store** tab in the app
-2. On first launch, enter an **Extension Repository URL** when prompted
-3. Browse and install extensions with one tap
-4. Or download a `.spotiflac-ext` file and install manually via **Settings > Extensions**
-5. Configure extension settings if needed
-6. Set provider priority under **Settings > Extensions > Provider Priority**
+3. **Build for iOS**
+   ```bash
+   flutter build ios --release
+   ```
 
-### Developing Extensions
+   > **Note**: Unsigned builds require an Apple Developer account for device deployment. See [Device Testing](#device-testing) below.
 
-> [!NOTE]
-> Want to build your own extension? Start with the
-> [Extension Development Guide](docs/EXTENSION_DEVELOPMENT.md). The
-> [documentation site](https://spotiflac.zarz.moe/docs) contains the expanded
-> API reference.
+## Device Testing
 
----
+### Physical Device
 
-## Development
+1. **Provisioning Profile**: You need a valid provisioning profile and team ID from Apple Developer
+   ```bash
+   # Open Xcode project
+   open ios/Runner.xcworkspace
+   ```
 
-SpotiFLAC Mobile combines a Flutter/Dart UI, a Go backend compiled with
-`gomobile`, and thin Android/iOS platform bridges. Toolchain versions are
-pinned in [`.fvmrc`](.fvmrc), [`go_backend/go.mod`](go_backend/go.mod), and the
-GitHub Actions workflows.
+2. **Build & Run on Device**
+   ```bash
+   flutter run -d <device_id> --release
+   ```
 
-Start with the [Contributing Guide](CONTRIBUTING.md) for the development setup,
-project boundaries, validation commands, and pull request checklist.
+3. **Using Sideload Tools** (TestFlight, AltStore, Sideloadly)
+   - Build the unsigned IPA
+   - Use a sideload service to deploy the app
+   - Requires valid provisioning or free Developer ID
 
----
+### Simulator
 
-## Related Projects
+**Note**: Simulator has limited audio hardware support. EQ audio effects may not be audible. For proper testing, use a physical device.
 
-### [SpotiFLAC (Desktop)](https://github.com/afkarxyz/SpotiFLAC)
-Download music in true lossless FLAC from extension-provided sources on Windows, macOS & Linux.
-
-### [SpotiFLAC (Python Module)](https://github.com/ShuShuzinhuu/SpotiFLAC-Module-Version)
-Python library for SpotiFLAC integration, maintained by [@ShuShuzinhuu](https://github.com/ShuShuzinhuu).
-
----
-
-## FAQ
-
-<details>
-<summary><b>Why does the Store tab ask me to enter a URL?</b></summary>
-<br>
-
-Starting from version 3.8.0, SpotiFLAC Mobile uses a decentralized extension
-repository system. Extensions are hosted independently rather than on a
-built-in server, so anyone can create and host a compatible repository. Enter
-a repository URL in the Store tab to browse and install extensions.
-
-</details>
-
-<details>
-<summary><b>Why is my download failing with "Song not found"?</b></summary>
-<br>
-
-The track may not be available from your enabled providers. Try enabling more providers under **Settings > Extensions > Provider Priority**, or install additional download extensions from the Store.
-
-</details>
-
-<details>
-<summary><b>Why are some tracks downloading in lower quality?</b></summary>
-<br>
-
-Quality depends on what's available from the source and the installed download extension. Check each extension's quality options and service notes in the app.
-
-</details>
-
-<details>
-<summary><b>Can I download playlists?</b></summary>
-<br>
-
-Yes! Just paste the playlist URL in the search bar. The app will fetch all tracks and queue them for download.
-
-</details>
-
-<details>
-<summary><b>Why do I need to grant storage permission?</b></summary>
-<br>
-
-The app needs a writable destination for downloaded files. On Android, choose a
-folder with the system folder picker (SAF), or use the app-specific folder. If
-Android revokes a saved folder grant, select the folder again in Settings.
-
-</details>
-
-<details>
-<summary><b>Is this app safe?</b></summary>
-<br>
-
-SpotiFLAC Mobile is open source, so its code and build workflows can be
-inspected directly in this repository.
-
-</details>
-
-<details>
-<summary><b>Why is downloading not working in my country?</b></summary>
-<br>
-
-Some countries have restricted access to certain streaming service APIs. If downloads are failing, try using a VPN to connect through a different region.
-
-</details>
-
-<details>
-<summary><b>Can I add SpotiFLAC Mobile to AltStore or SideStore?</b></summary>
-<br>
-
-Yes! Add the official source to receive updates directly within the app. Copy this link:
-
-```
-https://raw.githubusercontent.com/spotiflacapp/SpotiFLAC-Mobile/refs/heads/main/apps.json
+```bash
+flutter run -d "<simulator_name>" --release
 ```
 
-In AltStore/SideStore, go to **Browse > Sources**, tap **+**, and paste the link.
+## Configuration
 
-</details>
+### Audio Settings
+- **Internal Player Toggle**: Settings → Use Internal Player (disabled by default)
+- **Equalizer**: Settings → Equalizer (only visible when internal player is enabled)
+- **Presets**: Quick-apply presets from the Equalizer screen
 
-> [!NOTE]
-> If SpotiFLAC Mobile is useful to you, consider supporting development:
->
-> [![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zarzet)
+### Build Signing
 
----
+Edit `ios/Runner.xcodeproj` in Xcode to configure your provisioning profile and team ID before building for a physical device.
 
-## Contributors
+## Architecture
 
-Thanks to everyone who has contributed to SpotiFLAC Mobile!
+### Flutter (Dart)
+- **UI Layer**: Material design interface for playback, library, and EQ control
+- **State Management**: Riverpod for reactive state (equalizer settings, internal player toggle)
+- **Persistence**: SharedPreferences for EQ settings and player preferences
 
-<a href="https://github.com/spotiflacapp/SpotiFLAC-Mobile/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=spotiflacapp/SpotiFLAC-Mobile" />
-</a>
+### iOS (Swift)
+- **Audio Engine**: AVAudioEngine with AVAudioUnitEQ for 10-band parametric equalization
+- **Playback**: AVAudioPlayerNode for file playback
+- **Platform Channel**: Flutter MethodChannel (`com.spotififlac/ios_audio_player`) bridges Dart and native code
 
-We also appreciate everyone who helped with [translations on Crowdin](https://crowdin.com/project/spotiflac-mobile), reported bugs, suggested features, and spread the word.
+### Backend (Go)
+- Optional: Go backend for server-side features (sidecar binary, not required for local playback)
 
-Interested in contributing? Check out the [Contributing Guide](CONTRIBUTING.md) to get started!
+## Contributing
 
----
+### Code Style
+- **Flutter/Dart**: Follow the [Dart style guide](https://dart.dev/guides/language/effective-dart/style)
+- **Swift**: Follow Apple's [Swift style guide](https://swift.org/documentation/api-design-guidelines/)
+- **Go**: Run `gofmt` and `go vet` before submitting
 
-## API Credits
+### Testing
 
-| | | | | |
-|---|---|---|---|---|
-| [MusicDL](https://www.musicdl.me) | [LRCLib](https://lrclib.net) | [Paxsenix](https://lyrics.paxsenix.org) | [Cobalt](https://cobalt.tools) | [Song.link](https://song.link) |
-| [IDHS](https://github.com/sjdonado/idonthavespotify) |  |  |  |  |
+1. **Flutter Tests**
+   ```bash
+   flutter test
+   ```
 
----
+2. **Dart Analysis**
+   ```bash
+   flutter analyze
+   ```
 
-## Disclaimer
+3. **Manual Testing on Device**
+   - Enable internal player in Settings
+   - Open Equalizer screen
+   - Apply different presets and verify audio output
+   - Test manual band adjustments
+   - Verify settings persist after app restart
 
-This repository and its contents are provided strictly for educational and research purposes. The software is provided "as-is" without warranty of any kind, express or implied, as stated in the [MIT License](LICENSE).
+### Manual Test Checklist
 
-- No copyrighted content is hosted, stored, mirrored, or distributed by this repository.
-- Users must ensure that their use of this software is properly authorized and complies with all applicable laws, regulations, and third-party terms of service.
-- This software is provided free of charge by the maintainer. If you paid a third party for access to this software in its original form from this repository, you may have been misled or scammed. Any redistribution or commercial use by third parties must comply with the terms of the repository license. No affiliation, endorsement, or support by the maintainer is implied unless explicitly stated in writing.
-- SpotiFLAC Mobile is an independent project. It is not affiliated with, endorsed by, or connected to any other project or version on other platforms that may share a similar name. The maintainer of this repository has no control over or responsibility for third-party projects.
-- The author(s) disclaim all liability for any direct, indirect, incidental, or consequential damages arising from the use or misuse of this software. Users assume all risk associated with its use.
-- If you are a copyright holder or authorized representative and believe this repository infringes upon your rights, please contact the maintainer with sufficient detail (including relevant URLs and proof of ownership). The matter will be promptly investigated and appropriate action will be taken, which may include removal of the referenced material.
+- [ ] App launches and loads library
+- [ ] Internal player toggle persists after restart
+- [ ] Equalizer presets load correctly
+- [ ] EQ band sliders respond to input
+- [ ] Preamp slider adjusts overall volume
+- [ ] Playback works with internal player enabled
+- [ ] EQ settings persist across app sessions
+- [ ] Reset to Flat button restores default gains
+- [ ] Custom preset can be created and saved
 
-> [!TIP]
-> **Star the repo** to get notified about all new releases directly from GitHub.
+## Troubleshooting
+
+### Build Issues
+
+**CocoaPods dependency conflict**
+```bash
+cd ios
+pod repo update
+pod install --repo-update
+cd ..
+flutter clean
+flutter pub get
+```
+
+**Xcode build error**
+```bash
+open ios/Runner.xcworkspace  # Use .xcworkspace, NOT .xcodeproj
+```
+
+### Runtime Issues
+
+**Internal player not playing audio**
+- Ensure "Use Internal Player" is enabled in Settings
+- Check device volume is not muted
+- Verify audio file exists and is readable
+- Try disabling EQ and resetting to Flat
+
+**EQ changes not taking effect**
+- Ensure internal player is enabled
+- Stop and resume playback to apply new EQ settings
+- Check app logs for platform channel errors
+
+**Audio glitching or dropout**
+- Lower EQ band gains to reduce CPU load
+- Close other audio apps
+- Restart the app and device
+
+## Release Notes
+
+See [Releases](https://github.com/ShanTo-Msr/SpotiFLAC-Mobile/releases) for version history and change logs.
+
+## License
+
+See [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- **AVAudioEngine**: Apple's audio processing framework
+- **Flutter**: Google's cross-platform framework
+- **Community**: Contributors and testers
