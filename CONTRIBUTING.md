@@ -1,167 +1,348 @@
 # Contributing to SpotiFLAC Mobile
 
-Thank you for helping improve SpotiFLAC Mobile. Bug reports, focused pull
-requests, documentation, and translations are all welcome.
+Thank you for your interest in contributing to SpotiFLAC Mobile! This guide will help you get started with development on this iOS-only project.
 
-Please follow the [Code of Conduct](CODE_OF_CONDUCT.md) when participating in
-the project.
+## Project Status
 
-## Before You Start
-
-- Search the [existing issues](https://github.com/spotiflacapp/SpotiFLAC-Mobile/issues)
-  before opening a new one.
-- Use the issue template that best matches the problem.
-- Keep pull requests focused. Separate unrelated fixes into separate PRs.
-- Never commit credentials, signing files, downloaded media, or generated build
-  artifacts.
-
-Translations are managed through the
-[SpotiFLAC Mobile Crowdin project](https://crowdin.com/project/spotiflac-mobile).
-The English source strings live in `lib/l10n/arb/app_en.arb`.
-
-## Toolchain
-
-The repository is the source of truth for tool versions:
-
-- Flutter: `.fvmrc`
-- Dart: bundled with the pinned Flutter SDK
-- Go: `go_backend/go.mod`
-- Android SDK, NDK, and Java: `.github/workflows/ci.yml`
-- Xcode: required only for iOS builds
-
-[FVM](https://fvm.app/) is recommended. If you do not use FVM, install the
-exact Flutter version declared in `.fvmrc` and replace `fvm flutter` with
-`flutter` (and `fvm dart` with `dart`) in the commands below.
+**iOS Only**: SpotiFLAC Mobile is currently an iOS application. Android support has been removed as of this version. All contributions should target iOS (v14.0+).
 
 ## Development Setup
 
-1. Fork and clone the repository:
+### System Requirements
 
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/SpotiFLAC-Mobile.git
-   cd SpotiFLAC-Mobile
-   git remote add upstream https://github.com/spotiflacapp/SpotiFLAC-Mobile.git
-   ```
+- **macOS** 12.0 or later
+- **Xcode** 15.0 or later
+- **Xcode Command Line Tools**
+- **Flutter** (via FVM or direct install)
+- **CocoaPods** (usually included with Xcode)
+- **Go** 1.21+ (for backend optional features)
 
-2. Install the pinned Flutter SDK and Dart dependencies:
-
-   ```bash
-   fvm install
-   fvm flutter pub get
-   ```
-
-3. Build the Go backend for Android. `ANDROID_NDK_HOME` must point to the NDK
-   version used by CI and `CGO_ENABLED` must be enabled.
-
-   ```bash
-   cd go_backend
-   go mod download
-   go install golang.org/x/mobile/cmd/gomobile
-   gomobile init
-   mkdir -p ../android/app/libs
-   gomobile bind \
-     -target=android/arm,android/arm64 \
-     -androidapi 24 \
-     -o ../android/app/libs/gobackend.aar \
-     .
-   cd ..
-   ```
-
-   Running `go install` from `go_backend/` uses the `x/mobile` version pinned by
-   `go.mod`. Do not replace it with `@latest` in project scripts.
-
-4. Run the app:
-
-   ```bash
-   fvm flutter run
-   ```
-
-For iOS, run `scripts/build_ios.sh` on macOS before opening
-`ios/Runner.xcworkspace`.
-
-## Project Boundaries
-
-```text
-lib/          Flutter UI, state, models, and platform orchestration
-go_backend/   Download pipeline, extension runtime, and shared backend logic
-android/      Android platform bridge and foreground worker
-ios/          iOS platform bridge and application project
-test/         Flutter unit and widget tests
-assets/       Images, fonts, and bundled resources
-docs/         Contributor-facing technical contracts
-scripts/      Reproducible project build helpers
-```
-
-SpotiFLAC Mobile is extension-driven. Extension-specific behavior must be
-declared through a generic manifest field, capability, or reusable app API.
-Do not add provider-name checks such as `if source == 'provider-name'` to the
-main app. The Go backend should parse and expose the generic declaration, and
-Dart should consume that declaration without knowing which extension uses it.
-
-## Generated Files
-
-- After changing ARB files, run `fvm flutter gen-l10n` and commit the resulting
-  localization sources.
-- Run `fvm dart run build_runner build --delete-conflicting-outputs` only when a
-  model or generator input changes, then commit the relevant generated source.
-- Do not commit `build/`, `.dart_tool/`, AAR/XCFramework output, IDE state, or
-  local research directories.
-
-## Validation
-
-Run checks that cover the code you changed. Before opening a PR, the relevant
-commands should pass.
-
-Flutter and Dart:
+### Step 1: Clone the Repository
 
 ```bash
-fvm dart format --output=none --set-exit-if-changed lib test
-fvm flutter analyze
-fvm flutter test
+git clone https://github.com/ShanTo-Msr/SpotiFLAC-Mobile.git
+cd SpotiFLAC-Mobile
 ```
 
-Go backend:
+### Step 2: Install Flutter
+
+Using **FVM** (recommended):
+```bash
+brew install fvm
+fvm install
+fvm flutter pub get
+```
+
+Or manually:
+```bash
+flutter pub get
+```
+
+The Flutter version is pinned in `.fvmrc`.
+
+### Step 3: Install iOS Dependencies
 
 ```bash
-cd go_backend
-gofmt -w .
-go vet ./...
-go test ./...
+cd ios
+pod install --repo-update
+cd ..
 ```
 
-Android native code, after building `gobackend.aar`:
+### Step 4: Verify Setup
 
 ```bash
-cd android
-./gradlew :app:compileDebugKotlin :app:testDebugUnitTest
+flutter doctor
+flutter analyze
 ```
 
-For user-facing changes, add or update tests where practical and include
-before/after screenshots for UI changes.
+## Workflow
 
-## Code and Commit Style
+### Before You Start
 
-- Follow `analysis_options.yaml`, `.editorconfig`, and existing module patterns.
-- Keep user-facing strings in the localization files.
-- Prefer small functions and explicit error handling at platform boundaries.
-- Use [Conventional Commits](https://www.conventionalcommits.org/), for example:
+1. **Create a branch** off `main`:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-  ```text
-  feat(download): add batch selection
-  fix(storage): handle revoked folder access
-  docs(contributing): refresh Android setup
+2. **Keep it focused**: One feature or bugfix per branch
+
+3. **Reference issues**: If your work addresses an issue, reference it in commit messages
+   ```bash
+   git commit -m "fix: issue description (#123)"
+   ```
+
+### Code Style
+
+#### Dart/Flutter
+
+- Follow the [Effective Dart: Style Guide](https://dart.dev/guides/language/effective-dart/style)
+- Run formatter and analyzer before committing:
+  ```bash
+  dart format lib/
+  flutter analyze
+  ```
+- Use meaningful variable and function names
+- Keep lines under 100 characters when possible
+- Add documentation comments for public APIs:
+  ```dart
+  /// Applies the equalizer settings to the audio engine.
+  /// 
+  /// [gains] must contain exactly 10 values between -12.0 and 12.0 dB.
+  /// [preamp] must be between -6.0 and 6.0 dB.
+  void applyEQSettings({
+    required List<double> gains,
+    required double preamp,
+  }) { ... }
   ```
 
-## Pull Requests
+#### Swift
 
-1. Create a branch from an up-to-date `main`.
-2. Make one focused change and include tests or verification evidence.
-3. Complete the pull request template, including any checks that were not run
-   and why.
-4. Link related issues with `Fixes #123` where appropriate.
-5. Respond to review feedback with follow-up commits; maintainers may squash
-   commits when merging.
+- Follow [Apple's Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/)
+- Use meaningful names (full words, no abbreviations)
+- Add MARK comments for organization:
+  ```swift
+  // MARK: - Setup
+  // MARK: - Playback Control
+  // MARK: - EQ Control
+  ```
+- Document complex functions with doc comments:
+  ```swift
+  /// Configures the 10-band parametric equalizer with standard frequencies.
+  /// Bands are 31 Hz, 62 Hz, 125 Hz, ... 16 kHz.
+  private func setupEQBands() { ... }
+  ```
+- Use proper error handling (try-catch, guard statements)
 
-When reporting a crash, include the SpotiFLAC Mobile version, release channel,
-device/OS, exact reproduction steps, storage mode, and exported app logs. For a
-cold-start Android crash, `adb logcat -b crash -d` is especially useful.
+#### Go
+
+- Run `gofmt` on all Go files
+- Use `go vet` to check for issues:
+  ```bash
+  cd go_backend
+  gofmt -w .
+  go vet ./...
+  ```
+
+### Testing
+
+#### Flutter/Dart Tests
+
+```bash
+flutter test
+```
+
+- Add unit tests for new Dart functions
+- Place tests in `test/` directory
+- Name test files with `_test.dart` suffix
+
+#### Manual Testing on iOS
+
+1. **Run on device**:
+   ```bash
+   flutter run -d "<device_id>" --release
+   ```
+
+2. **Run on simulator**:
+   ```bash
+   flutter run -d "iPhone 15 Pro" --release
+   ```
+
+3. **Test equalizer features**:
+   - Navigate to Settings
+   - Toggle "Use Internal Player" on/off
+   - Open Equalizer screen and verify:
+     - Sliders are responsive
+     - Presets can be applied
+     - Settings persist after app restart
+     - Audio playback works (requires physical device for audible testing)
+
+4. **Check logs**:
+   ```bash
+   flutter logs
+   ```
+
+### Commits and PRs
+
+#### Commit Messages
+
+Use conventional commits for clarity:
+
+```
+feat: add 10-band equalizer UI screen
+fix: correct EQ band frequency mapping
+refactor: simplify platform channel error handling
+docs: add equalizer settings documentation
+test: add unit tests for EQ provider
+chore: update dependencies
+```
+
+#### Pull Request Template
+
+When opening a PR, include:
+
+1. **Description**: What does this PR do?
+2. **Motivation**: Why is this change needed?
+3. **Testing**: How did you test this?
+4. **Checklist**:
+   - [ ] Code follows style guidelines
+   - [ ] `flutter analyze` passes
+   - [ ] Tests added/updated (if applicable)
+   - [ ] Manual testing on iOS device/simulator
+   - [ ] PR is based on latest `main`
+   - [ ] Documentation updated (README, CONTRIBUTING, code comments)
+
+#### Review Process
+
+- At least one maintainer review required
+- All CI checks must pass
+- Address feedback promptly
+- Rebase on `main` if there are conflicts
+
+## Project Structure
+
+```
+SpotiFLAC-Mobile/
+├── lib/                           # Dart/Flutter source code
+│   ├── features/
+│   │   ├── equalizer/            # Equalizer UI and logic
+│   │   │   └── screens/
+│   │   │       └── equalizer_screen.dart
+│   │   └── settings/              # Settings and preferences
+│   │       └── screens/
+│   │           └── settings_screen.dart
+│   ├── providers/
+│   │   ├── equalizer_provider.dart     # EQ state management (Riverpod)
+│   │   └── internal_player_provider.dart # Player toggle state
+│   ├── services/
+│   │   └── ios_audio_player_channel.dart # Platform channel bridge
+│   └── main.dart
+├── ios/                           # iOS-specific code
+│   ├── Runner/
+│   │   ├── IOSAudioPlayer.swift   # AVAudioEngine implementation
+│   │   ├── IOSAudioPlayerPlugin.swift # Platform channel handler
+│   │   ├── GeneratedPluginRegistrant.swift (auto-generated)
+│   │   └── ...
+│   ├── Podfile                    # CocoaPods dependencies
+│   └── Runner.xcodeproj
+├── go_backend/                    # Go backend (optional)
+│   ├── go.mod
+│   ├── go.sum
+│   └── main.go
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                 # Flutter and Go tests
+│       └── release.yml            # iOS IPA builds
+├── pubspec.yaml                   # Flutter dependencies
+├── README.md                      # User documentation
+├── CONTRIBUTING.md                # This file
+└── .fvmrc                         # Flutter version pin
+```
+
+## Important Files
+
+### Configuration
+
+- **pubspec.yaml**: Flutter/Dart dependencies and app config
+- **ios/Podfile**: iOS CocoaPods dependencies
+- **.github/workflows/**: CI/CD configuration (Flutter tests, iOS builds)
+- **.fvmrc**: Flutter version (use FVM to manage)
+
+### Platform Channel
+
+- **lib/services/ios_audio_player_channel.dart**: Dart side of platform channel
+- **ios/Runner/IOSAudioPlayerPlugin.swift**: Swift plugin that receives calls
+- **ios/Runner/IOSAudioPlayer.swift**: Core audio engine implementation
+
+## Common Development Tasks
+
+### Adding a New Feature
+
+1. Create a feature branch: `git checkout -b feature/new-feature`
+2. Add Flutter code in `lib/features/<feature>/`
+3. If iOS-specific logic is needed, add Swift files in `ios/Runner/`
+4. Update platform channel if adding native calls
+5. Add tests in `test/`
+6. Update README if user-facing
+7. Submit PR with detailed description
+
+### Modifying the Equalizer
+
+1. **Dart side** (UI/state): Edit `lib/providers/equalizer_provider.dart` and `lib/features/equalizer/screens/equalizer_screen.dart`
+2. **Swift side** (audio processing): Edit `ios/Runner/IOSAudioPlayer.swift`
+3. **Platform channel**: Update `lib/services/ios_audio_player_channel.dart` if adding new methods
+4. Test on physical device with audio playing
+
+### Building for Release
+
+**GitHub Actions** automatically builds and creates releases when you tag a commit:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+For manual builds:
+
+```bash
+# iOS IPA
+flutter build ios --release
+
+# Output: build/ios/ipa/
+```
+
+## Troubleshooting
+
+### CocoaPods Issues
+
+```bash
+cd ios
+rm -rf Pods Podfile.lock
+pod install --repo-update
+cd ..
+flutter clean
+flutter pub get
+```
+
+### Xcode Build Errors
+
+Always use the `.xcworkspace` file:
+
+```bash
+open ios/Runner.xcworkspace
+```
+
+Not `.xcodeproj`.
+
+### Flutter Pub Issues
+
+```bash
+flutter clean
+flutter pub get
+flutter pub upgrade
+```
+
+### Platform Channel Not Found
+
+Ensure iOS plugin is registered. Check `GeneratedPluginRegistrant.swift` in Xcode:
+
+```bash
+flutter clean
+cd ios
+pod install
+cd ..
+flutter run
+```
+
+## Questions?
+
+- Check [GitHub Issues](https://github.com/ShanTo-Msr/SpotiFLAC-Mobile/issues)
+- Open a [Discussion](https://github.com/ShanTo-Msr/SpotiFLAC-Mobile/discussions)
+- Review existing PRs for patterns
+
+## Code of Conduct
+
+Be respectful, inclusive, and constructive. We welcome all skill levels.
+
+---
+
+**Thank you for contributing to SpotiFLAC Mobile!** 🎵
